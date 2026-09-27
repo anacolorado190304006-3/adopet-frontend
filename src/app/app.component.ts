@@ -18,48 +18,48 @@ export class AppComponent implements OnInit {
 
   ngOnInit(): void {
     this.auth.isAuthenticated$.subscribe(async (isAuthenticated) => {
+      if (!isAuthenticated) return;
 
-      if (!isAuthenticated) {
-        this.loading = false;
-        return;
-      }
       console.log('✅ Auth0 autenticado');
 
+      // Sincronizar usuario con PostgreSQL, pero NO bloquear el login
       try {
-        const user = await this.userService.getCurrentUser();
-        console.log('🐾 USUARIO:', user);
-
-        if (!user) {
-          this.loading = false;
-          return;
-        }
-
-        console.log('🎯 ROL:', user.rol);
-        switch (user.rol) {
-
-          case 'administrador':
-            console.log('➡️ ADMIN');
-            await this.router.navigateByUrl('/administrador');
-            break;
-
-          case 'organizacion':
-            console.log('➡️ ORGANIZACIÓN');
-            await this.router.navigateByUrl('/organizacion');
-            break;
-
-          case 'adoptante':
-            console.log('➡️ ADOPTANTE');
-            await this.router.navigateByUrl('/adoptante');
-            break;
-
-          default:
-            console.error('❌ Rol no reconocido:', user.rol);
-        }
-
+        await this.userService.syncUser();
+        console.log('✅ Usuario sincronizado con PostgreSQL');
       } catch (error) {
-        console.error('❌ Error cargando usuario:', error);
-      } finally {
-        this.loading = false;
+        console.error('⚠️ Error sincronizando usuario:', error);
+      }
+
+      // Obtener usuario desde PostgreSQL
+      const user = await this.userService.getCurrentUser();
+
+      console.log('🐾 USUARIO:', user);
+
+      if (!user) {
+        console.error('❌ No se pudo obtener el usuario');
+        return;
+      }
+
+      console.log('🎯 ROL:', user.rol);
+
+      switch (user.rol) {
+        case 'administrador':
+          console.log('➡️ ADMIN');
+          await this.router.navigateByUrl('/administrador');
+          break;
+
+        case 'organizacion':
+          console.log('➡️ ORGANIZACIÓN');
+          await this.router.navigateByUrl('/organizacion');
+          break;
+
+        case 'adoptante':
+          console.log('➡️ ADOPTANTE');
+          await this.router.navigateByUrl('/adoptante');
+          break;
+
+        default:
+          console.error('❌ Rol no reconocido:', user.rol);
       }
     });
   }

@@ -1,24 +1,26 @@
 import { Routes } from '@angular/router';
-import { AppComponent } from './app.component';
+import { HomeComponent } from './pages/home/home.component';
 import { authGuard } from './guards/auth.guard';
-import { roleGuard } from './guards/role.guard';
 
 export const routes: Routes = [
+
   {
     path: '',
-    component: AppComponent
+    component: HomeComponent
   },
+
   {
     path: 'adoptante',
-    canActivate: [authGuard, () => roleGuard(['adoptante'])],
+    canActivate: [authGuard],
     loadComponent: () =>
       import('./pages/adoptante/adoptante.component').then(
         m => m.AdoptanteComponent
       )
   },
+
   {
     path: 'organizacion',
-    canActivate: [authGuard, () => roleGuard(['organizacion'])],
+    canActivate: [authGuard],
     loadComponent: () =>
       import('./pages/organizacion/organizacion.component').then(
         m => m.OrganizacionComponent
@@ -26,10 +28,10 @@ export const routes: Routes = [
   },
   {
     path: 'administrador',
-    canActivate: [authGuard, () => roleGuard(['administrador'])],
     loadComponent: () =>
-      import('./pages/administrador/administrador.component').then(
-        m => m.AdministradorComponent
-      )
-  }
+        import('./pages/administrador/administrador.component').then(
+            m => m.AdministradorComponent
+        )
+    }
+
 ];

@@ -1,1 +1,1038 @@
-<p>administrador works!</p>
+<div class="admin-page">
+
+    <!-- =========================
+         HEADER
+    ========================= -->
+
+    <header class="admin-header">
+
+        <div class="brand">
+
+            <img src="assets/images/logo-adopet.png" alt="AdoPet" />
+
+            <div>
+                <h1>Panel administrativo</h1>
+                <p>Gestiona los usuarios de AdoPet</p>
+            </div>
+
+        </div>
+
+
+        <div class="user-menu">
+
+            <button type="button" class="admin-badge" (click)="toggleUserMenu()">
+
+                <span class="avatar">
+                    A
+                </span>
+
+                <span class="admin-info">
+
+                    <strong>
+                        Administrador
+                    </strong>
+
+                    <small>
+                        Acceso global
+                    </small>
+
+                </span>
+
+                <span class="menu-arrow">
+
+                    <img src="assets/images/icons/dropdown-arrow-svgrepo-com.svg" [class.rotated]="showUserMenu"
+                        alt="" />
+
+                </span>
+
+            </button>
+
+
+            @if (showUserMenu) {
+
+            <div class="dropdown-menu">
+
+                <div class="dropdown-header">
+
+                    <span class="dropdown-avatar">
+                        A
+                    </span>
+
+                    <div>
+
+                        <strong>
+                            Administrador
+                        </strong>
+
+                        <small>
+                            Acceso global
+                        </small>
+
+                    </div>
+
+                </div>
+
+
+                <div class="dropdown-divider"></div>
+
+
+                <button type="button" class="logout-option" (click)="logout()">
+
+                    <span>
+                        ↪
+                    </span>
+
+                    Cerrar sesión
+
+                </button>
+
+            </div>
+
+            }
+
+        </div>
+
+    </header>
+
+
+
+    <!-- =========================
+         CONTENIDO PRINCIPAL
+    ========================= -->
+
+    <main class="admin-content">
+
+
+        <!-- =========================
+             BIENVENIDA
+        ========================= -->
+
+        <section class="welcome">
+
+            <div>
+
+                <span class="eyebrow">
+                    ADMINISTRACIÓN
+                </span>
+
+                <h2>
+                    ¡Hola, administrador! 👋
+                </h2>
+
+                <p>
+                    Desde aquí puedes administrar los usuarios
+                    registrados en AdoPet.
+                </p>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- =========================
+             CARDS / ESTADÍSTICAS
+        ========================= -->
+
+        <section class="stats">
+
+
+            <!-- TODOS -->
+
+            <article class="stat-card" [class.active]="filterRole === 'todos'" (click)="setFilter('todos')">
+
+                <div class="stat-icon purple">
+                    👥
+                </div>
+
+                <div>
+
+                    <span>
+                        Usuarios
+                    </span>
+
+                    <strong>
+                        {{ users.length }}
+                    </strong>
+
+                </div>
+
+            </article>
+
+
+
+            <!-- ORGANIZACIONES -->
+
+            <article class="stat-card" [class.active]="filterRole === 'organizacion'"
+                (click)="setFilter('organizacion')">
+
+                <div class="stat-icon teal">
+                    🏢
+                </div>
+
+                <div>
+
+                    <span>
+                        Organizaciones
+                    </span>
+
+                    <strong>
+                        {{ organizationCount }}
+                    </strong>
+
+                </div>
+
+            </article>
+
+
+
+            <!-- ADOPTANTES -->
+
+            <article class="stat-card" [class.active]="filterRole === 'adoptante'" (click)="setFilter('adoptante')">
+
+                <div class="stat-icon yellow">
+                    🐾
+                </div>
+
+                <div>
+
+                    <span>
+                        Adoptantes
+                    </span>
+
+                    <strong>
+                        {{ adopterCount }}
+                    </strong>
+
+                </div>
+
+            </article>
+
+        </section>
+
+
+
+        <!-- =========================
+             TABLA DE USUARIOS
+        ========================= -->
+
+        <section class="users-section">
+
+
+            <!-- HEADER DE SECCIÓN -->
+
+            <div class="section-header">
+
+                <div>
+
+                    <h2>
+
+                        @if (filterRole === 'organizacion') {
+                        Organizaciones
+                        } @else if (filterRole === 'adoptante') {
+                        Adoptantes
+                        } @else {
+                        Usuarios globales
+                        }
+
+                    </h2>
+
+
+                    <p>
+
+                        @if (filterRole === 'organizacion') {
+
+                        Organizaciones registradas en Auth0
+
+                        } @else if (filterRole === 'adoptante') {
+
+                        Adoptantes registrados en Auth0
+
+                        } @else {
+
+                        Usuarios registrados en Auth0
+
+                        }
+
+                    </p>
+
+
+                    <button type="button" class="create-user-btn" (click)="openCreateModal()">
+
+                        <span>
+                            +
+                        </span>
+
+                        Crear usuario
+
+                    </button>
+
+                </div>
+
+
+
+                <!-- BUSCADOR -->
+
+                <div class="search-box">
+
+                    <span>
+                        ⌕
+                    </span>
+
+                    <input type="text" placeholder="Buscar por nombre, correo..." [(ngModel)]="search"
+                        (input)="filterUsers()" />
+
+                </div>
+
+            </div>
+
+
+
+            <!-- =========================
+                 LOADING
+            ========================= -->
+
+            @if (loading) {
+
+            <div class="loading">
+                Cargando usuarios...
+            </div>
+
+            } @else {
+
+
+            <!-- =========================
+                 TABLA
+            ========================= -->
+
+            <div class="table-wrapper">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+
+                            <th>
+                                Usuario
+                            </th>
+
+                            <th>
+                                Correo
+                            </th>
+
+                            <th>
+                                Rol
+                            </th>
+
+                            <th>
+                                Último acceso
+                            </th>
+
+                            <th>
+                                Acciones
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+
+                        @for (user of filteredUsers; track user.user_id) {
+
+                        <tr class="user-row" (click)="openUser(user)">
+
+
+                            <!-- USUARIO -->
+
+                            <td>
+
+                                <div class="user-cell">
+
+                                    <img [src]="user.picture || 'assets/images/logo-adopet.png'" alt="" />
+
+
+                                    <div>
+
+                                        <strong>
+
+                                            {{
+                                            user.user_metadata?.nameOrg
+                                            || user.name
+                                            || user.nickname
+                                            || 'Sin nombre'
+                                            }}
+
+                                        </strong>
+
+
+                                        <small>
+                                            {{ user.user_id }}
+                                        </small>
+
+                                    </div>
+
+                                </div>
+
+                            </td>
+
+
+
+                            <!-- CORREO -->
+
+                            <td>
+
+                                {{ user.email || '—' }}
+
+                            </td>
+
+
+
+                            <!-- ROL -->
+
+                            <td>
+
+                                <span class="role" [class.organization]="getRole(user) === 'Organización'"
+                                    [class.adopter]="getRole(user) === 'Adoptante'"
+                                    [class.admin]="getRole(user) === 'Administrador'">
+
+                                    {{ getRole(user) }}
+
+                                </span>
+
+                            </td>
+
+
+
+                            <!-- ÚLTIMO ACCESO -->
+
+                            <td>
+
+                                {{
+                                user.last_login
+                                ? (user.last_login | date:'dd/MM/yyyy HH:mm')
+                                : 'Nunca'
+                                }}
+
+                            </td>
+
+
+
+                            <!-- ACCIONES -->
+
+                            <td>
+
+                                <button type="button" class="delete-btn"
+                                    (click)="$event.stopPropagation(); deleteUser(user)"
+                                    [disabled]="user.user_id === 'auth0|6aa76fa9ab38116cd1c9ca11'">
+
+                                    🗑
+
+                                </button>
+
+                            </td>
+
+                        </tr>
+
+                        }
+
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+            }
+
+
+            <!-- ==================================================
+                 MODAL INFORMACIÓN DEL USUARIO
+            ================================================== -->
+
+            @if (showUserModal && selectedUser) {
+
+            <div class="user-modal-backdrop" (click)="closeUserModal()">
+
+                <div class="user-modal" (click)="$event.stopPropagation()">
+
+                    <!-- =========================
+                    HEADER
+                    ========================= -->
+
+                    <div class="modal-header">
+
+                        <div>
+
+                            @if (isOrganization(selectedUser)) {
+
+                            <h2>Información de la organización</h2>
+
+                            <p>
+                                Consulta y administra los datos de la organización.
+                            </p>
+
+                            } @else {
+
+                            <h2>Información del usuario</h2>
+
+                            <p>
+                                Gestiona los datos de este usuario global.
+                            </p>
+
+                            }
+
+                        </div>
+
+                        <button type="button" class="modal-close" (click)="closeUserModal()">
+                            ×
+                        </button>
+
+                    </div>
+
+
+                    <!-- =========================
+                        CONTENIDO
+                     ========================= -->
+
+                    <div class="modal-content">
+
+                        <!-- PERFIL -->
+
+                        <div class="user-profile">
+
+                            <img [src]="selectedUser.picture || 'assets/images/logo-adopet.png'" alt="Usuario" />
+
+                            <div>
+
+                                <h3>
+                                    {{
+                                    isOrganization(selectedUser)
+                                    ? (selectedUser.user_metadata?.nameOrg || 'Sin nombre')
+                                    : (selectedUser.name || selectedUser.nickname || 'Sin nombre')
+                                    }}
+                                </h3>
+
+                                <span class="role-badge">
+                                    {{ getRole(selectedUser) }}
+                                </span>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- ==================================================
+                 ORGANIZACIÓN
+            ================================================== -->
+
+                        @if (isOrganization(selectedUser)) {
+
+                        <div class="form-grid">
+
+                            <!-- NOMBRE -->
+
+                            <div class="form-group">
+
+                                <label>
+                                    Nombre de la organización
+                                </label>
+
+                                <input type="text" [value]="selectedUser.user_metadata?.nameOrg || '—'" disabled />
+
+                            </div>
+
+
+                            <!-- CORREO -->
+
+                            <div class="form-group">
+
+                                <label>
+                                    Correo electrónico
+                                </label>
+
+                                <input type="email" [value]="selectedUser.email || '—'" disabled />
+
+                            </div>
+
+
+                            <!-- TIPO ID -->
+
+                            <div class="form-group">
+
+                                <label>
+                                    Tipo de identificación
+                                </label>
+
+                                <input type="text" [value]="selectedUser.user_metadata?.typeIdOrg || '—'" disabled />
+
+                            </div>
+
+
+                            <!-- ID -->
+
+                            <div class="form-group">
+
+                                <label>
+                                    Identificación
+                                </label>
+
+                                <input type="text" [value]="selectedUser.user_metadata?.idOrg || '—'" disabled />
+
+                            </div>
+
+
+                            <!-- AUTH0 -->
+
+                            <div class="form-group full">
+
+                                <label>
+                                    Auth0 User ID
+                                </label>
+
+                                <input type="text" [value]="selectedUser.user_id" disabled />
+
+                            </div>
+
+
+                            <!-- TELÉFONO -->
+
+                            <div class="form-group">
+
+                                <label>
+                                    Teléfono
+                                </label>
+
+                                @if (editingUser) {
+
+                                <input type="text" [value]="getOrganizationPhone()"
+                                    (input)="setOrganizationPhone($any($event.target).value)"
+                                    placeholder="+57 300 7895467" />
+
+                                } @else {
+
+                                <input type="text" [value]="getOrganizationPhone() || '—'" disabled />
+
+                                }
+
+                            </div>
+
+
+                            <!-- PAÍS -->
+
+                            <div class="form-group">
+
+                                <label>
+                                    País
+                                </label>
+
+                                @if (editingUser) {
+
+                                <input type="text" [(ngModel)]="selectedUser.user_metadata.paisOrg" />
+
+                                } @else {
+
+                                <input type="text" [value]="selectedUser.user_metadata?.paisOrg || '—'" disabled />
+
+                                }
+
+                            </div>
+
+
+                            <!-- DEPARTAMENTO -->
+
+                            <div class="form-group">
+
+                                <label>
+                                    Departamento
+                                </label>
+
+                                @if (editingUser) {
+
+                                <input type="text" [(ngModel)]="selectedUser.user_metadata.departamentoOrg" />
+
+                                } @else {
+
+                                <input type="text" [value]="selectedUser.user_metadata?.departamentoOrg || '—'"
+                                    disabled />
+
+                                }
+
+                            </div>
+
+
+                            <!-- CIUDAD -->
+
+                            <div class="form-group">
+
+                                <label>
+                                    Ciudad
+                                </label>
+
+                                @if (editingUser) {
+
+                                <input type="text" [(ngModel)]="selectedUser.user_metadata.ciudadOrg" />
+
+                                } @else {
+
+                                <input type="text" [value]="selectedUser.user_metadata?.ciudadOrg || '—'" disabled />
+
+                                }
+
+                            </div>
+
+
+                        </div>
+
+
+                        } @else {
+
+
+                        <!-- ==================================================
+                 USUARIO NORMAL / ADOPTANTE
+            ================================================== -->
+
+                        <div class="form-grid">
+
+                            <!-- NOMBRE -->
+
+                            <div class="form-group">
+
+                                <label>
+                                    Nombre
+                                </label>
+
+                                <input type="text" [(ngModel)]="selectedUser.name" [disabled]="!editingUser" />
+
+                            </div>
+
+
+                            <!-- CORREO -->
+
+                            <div class="form-group">
+
+                                <label>
+                                    Correo electrónico
+                                </label>
+
+                                <input type="email" [(ngModel)]="selectedUser.email" [disabled]="!editingUser" />
+
+                            </div>
+
+
+                            <!-- AUTH0 -->
+
+                            <div class="form-group full">
+
+                                <label>
+                                    Auth0 User ID
+                                </label>
+
+                                <input type="text" [value]="selectedUser.user_id" disabled />
+
+                            </div>
+
+
+                            <!-- ROL -->
+
+                            <div class="form-group">
+
+                                <label>
+                                    Rol
+                                </label>
+
+                                <select [(ngModel)]="selectedUser.user_metadata.role" [disabled]="!editingUser">
+
+                                    <option value="administrador">
+                                        Administrador
+                                    </option>
+
+                                    <option value="organizacion">
+                                        Organización
+                                    </option>
+
+                                    <option value="adoptante">
+                                        Adoptante
+                                    </option>
+
+                                </select>
+
+                            </div>
+
+
+                            <!-- FECHA -->
+
+                            <div class="form-group">
+
+                                <label>
+                                    Fecha de registro
+                                </label>
+
+                                <input type="text" [value]="selectedUser.created_at | date:'dd/MM/yyyy'" disabled />
+
+                            </div>
+
+                        </div>
+
+                        }
+
+                    </div>
+
+
+                    <!-- =========================
+             FOOTER
+        ========================= -->
+
+                    <div class="modal-footer">
+
+                        @if (!editingUser) {
+
+                        <button type="button" class="edit-btn" (click)="startEditing()">
+
+                            ✏️
+
+                            @if (isOrganization(selectedUser)) {
+                            Editar organización
+                            } @else {
+                            Editar usuario
+                            }
+
+                        </button>
+
+                        } @else {
+
+                        <button type="button" class="cancel-btn" (click)="cancelEditing()">
+                            Cancelar
+                        </button>
+
+                        <button type="button" class="save-btn" (click)="saveUser()">
+                            Guardar cambios
+                        </button>
+
+                        }
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            }
+
+
+            <!-- ==================================================
+                 MODAL ÉXITO
+            ================================================== -->
+
+            @if (showSuccessModal) {
+
+            <div class="success-modal-backdrop" (click)="closeSuccessModal()">
+
+                <div class="success-modal" (click)="$event.stopPropagation()">
+
+                    <div class="success-icon">
+                        ✓
+                    </div>
+
+
+                    <h2>
+
+                        {{
+                        successMessage.includes('correctamente')
+                        ? '¡Listo!'
+                        : 'Ups...'
+                        }}
+
+                    </h2>
+
+
+                    <p>
+                        {{ successMessage }}
+                    </p>
+
+
+                    <button type="button" class="success-btn" (click)="closeSuccessModal()">
+
+                        Aceptar
+
+                    </button>
+
+                </div>
+
+            </div>
+
+            }
+
+
+
+            <!-- ==================================================
+                 MODAL CREAR USUARIO
+            ================================================== -->
+
+            @if (showCreateModal) {
+
+            <div class="user-modal-backdrop" (click)="closeCreateModal()">
+
+                <div class="user-modal" (click)="$event.stopPropagation()">
+
+
+                    <!-- HEADER -->
+
+                    <div class="modal-header">
+
+                        <div>
+
+                            <h2>
+                                Crear usuario
+                            </h2>
+
+                            <p>
+                                Registra un nuevo usuario global en AdoPet.
+                            </p>
+
+                        </div>
+
+
+                        <button type="button" class="modal-close" (click)="closeCreateModal()">
+
+                            ×
+
+                        </button>
+
+                    </div>
+
+
+
+                    <!-- CONTENT -->
+
+                    <div class="modal-content">
+
+                        <div class="form-grid">
+
+
+                            <!-- NOMBRE -->
+
+                            <div class="form-group">
+
+                                <label>
+                                    Nombre
+                                </label>
+
+                                <input type="text" [(ngModel)]="newUser.name" placeholder="Nombre completo" />
+
+                            </div>
+
+
+
+                            <!-- IDENTIFICACIÓN -->
+
+                            <div class="form-group">
+
+                                <label>
+                                    Identificación
+                                </label>
+
+                                <input type="text" [(ngModel)]="newUser.identification"
+                                    placeholder="Número de identificación" />
+
+                            </div>
+
+
+
+                            <!-- CORREO -->
+
+                            <div class="form-group full">
+
+                                <label>
+                                    Correo electrónico
+                                </label>
+
+                                <input type="email" [(ngModel)]="newUser.email" placeholder="correo@ejemplo.com" />
+
+                            </div>
+
+
+
+                            <!-- PASSWORD -->
+
+                            <div class="form-group full">
+
+                                <label>
+                                    Contraseña temporal
+                                </label>
+
+                                <input type="password" [(ngModel)]="newUser.password" placeholder="Contraseña" />
+
+                            </div>
+
+
+
+                            <!-- ROL -->
+
+                            <div class="form-group full">
+
+                                <label>
+                                    Rol
+                                </label>
+
+                                <select [(ngModel)]="newUser.role">
+
+                                    <option value="adoptante">
+                                        Adoptante
+                                    </option>
+
+                                    <option value="organizacion">
+                                        Organización
+                                    </option>
+
+                                    <option value="administrador">
+                                        Administrador
+                                    </option>
+
+                                </select>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- FOOTER -->
+
+                    <div class="modal-footer">
+
+                        <button type="button" class="cancel-btn" (click)="closeCreateModal()" [disabled]="creatingUser">
+
+                            Cancelar
+
+                        </button>
+
+
+                        <button type="button" class="save-btn" (click)="createUser()" [disabled]="creatingUser">
+
+                            {{
+                            creatingUser
+                            ? 'Creando...'
+                            : 'Crear usuario'
+                            }}
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            }
+
+        </section>
+
+    </main>
+
+</div>

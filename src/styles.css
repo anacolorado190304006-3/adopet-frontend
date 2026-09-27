@@ -1,1 +1,27 @@
-/* You can add global styles to this file, and also import other style files */
+@import url('https://fonts.googleapis.com/css2?family=DynaPuff:wght@400..700&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+
+:root {
+  --primary: #5e31c2;
+  --primary-dark: #47209f;
+  --primary-light: #eee8ff;
+
+  --teal: #0aadb6;
+  --yellow: #efb138;
+  --blue: #adc5e1;
+  --pink: #f31057;
+
+  --text: #24202d;
+  --text-light: #6f6a78;
+  --background: #ffffff;
+  --background-soft: #f8f7fb;
+  --font-title: 'DynaPuff', cursive;
+  --font-body: 'Montserrat', sans-serif;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+}
